@@ -24,3 +24,5 @@ The third cell performs the two-level tests; set the number of tests and desired
 
 The final cell performs random draws from the parameter sets, generates corresponding series, and performs chi-squared goodness of fit tests on each, which are then plotted on a histogram.
 
+Also included is a notedbook that reads the parameters for primitive trinomials entabulated in Zierler and Brillhart's 1968 paper in Information and Control. 
+
