@@ -1,5 +1,5 @@
 # tausworthe
-Simulates the properties of the Tausworthe pseudo-random number generator (see the pdf of the paper in this repo).
+Simulates the properties of the Tausworthe pseudo-random number generator based on the trinomial recurrence $x_i=x_{i-p} + x_{i-q}$  (see the pdf of the paper in this repo).
 
 The main code notebook (tausworth5) was run in Jupyter Notebook under Python 3.9. It uses these packages:
 
