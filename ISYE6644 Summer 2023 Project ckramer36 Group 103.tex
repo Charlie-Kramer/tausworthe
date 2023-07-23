@@ -1,0 +1,161 @@
+
+\documentclass[12pt]{amsart}
+\usepackage{geometry} % see geometry.pdf on how to lay out the page. There's lots.
+\usepackage{graphicx}
+\usepackage{natbib}
+\usepackage{verbatim}
+\usepackage{hyperref}
+\bibpunct{(}{)}{;}{a}{,}{,}
+\geometry{a4paper} % or letter or a5paper or ... etc
+% \geometry{landscape} % rotated page geometry
+
+% See the ``Article customise'' template for come common customisations
+
+\title{}
+\title{Properties of the Tausworthe Generator}
+
+\author{Charles Kramer (ckramer36), Group 103}
+\date{July 2023} 
+%%% BEGIN DOCUMENT
+\begin{document}
+\begin{abstract}
+I simulate the uniformity and independence properties of the Tausworthe pseudo-random number generator in 1-level and 2-level tests for a given parameterization, and for a range of randomly-selected parameterizations. These parameterizations have sound theoretical properties, yet produce series that consistently reject the hypothesis that they are uniformly distributed. Accordingly, caution is warranted in using the output of the Tausworthe generator.   
+\end{abstract}
+\maketitle
+%\tableofcontents
+
+
+\section{Introduction to the Tausworthe Generator}
+
+The \cite{Tausworthe} generator produces pseudo-random numbers (PRNs) from the following algorithm:
+
+\begin{itemize}
+\item Starting with an initial set of binary digits {$x_i$, i=1,...,n}, produce a series of digits using the recurrence $x_i = c_1 x_{i-1} +\ldots+ c_n x_{i-n} \; mod \: 2$ for ${c_j}  \in \{0,1\}$.
+\item Group $l$ of the $x_i$ together to form a $l$-digit binary 'word', e.g. $x_ix_{i-1} \ldots x_{i-l-1}.$
+\item Divide the word by $2^l$ to produce a decimal digit $u_i$ between 0 and 1. \\
+\end{itemize}
+The Tausworthe generator is one of a class of \textit{linear feedback shift register generators}, so named because the generating process is equivalent to a series of bitwise shift operations (for details see \cite{CampLewis}). In the commonly studied case where there are just two nonzero $c_j$, the recurrence can be equivalently expressed as $x_i = x_{i-p} \oplus x_{i-q}  $ where $p>q$ and $\oplus$ denotes "exclusive or."   
+
+\section{Background: Properties of Tausworthe PRNs}
+
+\subsection{Key Findings in Previous Studies}
+
+Several studies have explored the empirical and theoretical characteristics of the Tausworthe generator. \cite{Tausworthe} documents the conditions for full period (described below) and shows that the theoretical mean and variance of the generated PRNs match those of the uniform distribution. He also derives an expression for the expected value of the sample autocorrelation function at lag m, $E[\hat{\rho(m)}] = -2^{-q} (\frac{(1-2^{-l})^2}{1-2^{-q}})), m < \frac{p-l}{q}$.  He notes that this value is small, and \cite{Whittlesey} and \cite{NewmanMartin} validate the low-autocorrelation property via simulation.   
+
+In related work, \cite{ToothillRobinsonAdams} study the runs properties of Tausworthe sequences for various parameterizations. They stress the importance of choosing large $p$ to avoid predictable patterns. They find that with $l$=15, $p$=151 and $q$=136, the generator demonstrates good (statistically random) runs performance.  
+
+\cite{MatsumotoKurita} emphasizes the importance of judiciously selecting the initial seed. They show that the Tausworthe generator exhibits short-term cyclical behavior (with $x_L = x_{2L}$ for every integer $L$) and persistent non-randomness around certain seeds. They denote such a seed a \emph{fixed vector} and note that a fixed vector includes no more than two "1" digits. They document \emph{inter alia} that with a fixed vector used as a seed, the number of "1" digits in the sequence can be far from its theoretical mean for long parts of the sequence. 
+
+\subsection{Period}
+
+One essential property of a PRN generator is a long period--e..g. a long run before it repeats its output (and hence begins to repeat the full sequence, given that the generation process is deterministic). \cite{LEcuyer1994} defined period more formally as follows. 
+Where the state of the generator is $s$ (here, corresponding to the binary word used to create the PRNs), the period is the smallest integer $P$ such that for some integer $\tau$ and all $n \ge \tau, s_{P+n} = s_n$. The smallest such $\tau$ is called the \emph{transient}; if $\tau=0$, the sequence is purely periodic.
+
+The Tausworthe generator has full period $P = 2^n -1$ if the characteristic polynomial of the recurrence, $P(z) = 1 + c_1 x + c_2 x^2 + \ldots + x^n $, is primitive (irreducible) over the Galois field(2) (e.g. the set with elements 0 and 1, closed under addition and multiplication operations defined thereon; in plain terms, the $c_j$ and $x_i$ are all zeroes and ones and the recurrence turns binary digits into more binary digits).  If, in addition, the word length is relatively prime to $2^n-1$, then the generated PRNs will have the same period. 
+
+As noted above, many studies of the Tausworthe generator work with trinomials where only two of the $c_i$ are nonzero.  \cite{ZierlerBrillhart} calculate primitive trinomials mod 2 for a range of $p$ and $q$. I use these to parameterize the generator in the experiments described below. 
+
+\subsection{Uniformity}
+
+Another key characteristic is uniformity. In one dimension, the elements of the series ${u_i}$ should be uniformly distributed along the line segment [0,1]--e.g. a histogram of the distribution should look flat. In $k$ dimensions, the points defined by the tuples ${(u_i,u_{i-1}\ldots u_{i-(k-1)}), i = k, 2k, 3k\ldots}$ should be equidistributed (the k-dimensional analog of uniformity), with the same number of points in each box defined by a partition of the k-dimensional hypercube. 
+
+\cite{LEcuyer1994} notes that the output of the Tausworthe generator may not be uniformly distributed, depending on the parameterization of the generator. Accordingly, I perform the following tests for uniformity in one dimension: 
+\begin{itemize} 
+\item the chi-square goodness of fit test, with statistic $\chi^2 (k-1)= \sum_i ^k (O_i - E_i)^2/E_i$ where $O_i$ and $E_i$ are the number of observed and expected data points in partition $i, i=1,\ldots,k. $
+\item the Anderson-Darling test, with statistic $A^2 = -n-{\sum_{i-1} ^n} {{2i-1}\over{n}} [ \ln(F(x_i))+ ln(1-F(x_{n+1-i})]$ where $F(x)$ is the hypothesized distribution, n is the sample size and the sample is sorted in increasing order. In the empirical work, I apply a Box-Muller transformation and then test for normality. The Anderson-Darling test has greater power against a number of alternatives than the more-standard Kolmogorov-Smirnov test (\cite{Law2015}, p. 356).
+\end{itemize}
+\subsection{Independence}
+A third property is independence (sometimes characterized as unpredictability). For example, $u_i$ should not be predictable from $u_{i-k}, i=1,2,...$ or from functions thereof. 
+
+I perform four tests of independence:
+
+\begin{itemize}
+
+\item the runs above-and-below-means test $Z = {{R-\bar R} \over {s_R}}$ where $R$ is the observed number of runs, $\bar R = {{2n_1n_2} \over {n_1+n_2}} +1$ is the expected number of runs, and $s^2_R = {{2n_1n_2 (2n_1n_2-n_1-n_2)} \over {(n_1+n_2)^2 (n_1+n_2-1)}} $ where $n_1$ and $n_2$ are the number of observations above and below the mean, respectively. The statistic is approximately distributed N(0,1) in large samples under the null of no runs behavior.
+\item the Ljung-Box autocorrelation test $Q_{LB} = n(n-2) \sum_{j=1} ^h {{\hat{\rho}^2(j)} \over {n-j}}$ where $n$ is the sample size, $\hat{\rho}(j)$ is the estimated autocorrelation at lag $j$, and $h$ is the maximum lag order under test (\cite{Harvey1986}, p 156). $Q_{LB}$ is distributed $\chi^2(h)$ under the null of no autocorrelation.
+\item the Engle test for autoregressive conditional heteroskedasticity (ARCH), or second-moment dependence (\cite{Hamilton1994}, Ch. 12). The test is based on the relation $x_t^2 = \alpha_0 + \sum_{i=1} ^m \alpha_i x_{t-i}^2 + \epsilon_t$ where the null of no ARCH structure is $H_0: \alpha_1 = \alpha_2  = \ldots = \alpha_m = 0$ (performed using the standard F-test for joint significance of regression coefficients). 
+\item the Brock-Dechert-Scheinkman test of independence and identical distribution, based on the insight that if the data are i.i.d., the probability that a given pair of m-dimensional points that are less than or equal to $\epsilon$ distance apart will be a constant (\cite{BaumHurnLindsay}). Accordingly, this probability in m dimensions would be merely the m-fold product of the probability in one dimension. Denoting the former probability as $C_m(\epsilon)$, the i.i.d. null hypothesis is equivalent to  $C_m(\epsilon) = C_1(\epsilon)^m$.  These probabilities are estimated using the \emph{correlation integral}  $C_m(\epsilon) = {{2} \over {n(n-1) }} \sum_{j=1}^{n-1}\sum_{k=j+1}^{n}\prod_{r=0}^{m-1} I(|x_{j+r} - x_{k+r}|  \le \epsilon) $ and the test statistic $\sqrt{n} (C_m(\epsilon)-C_1^m(\epsilon))/\sigma_{n,m}$ is asypmtotically distributed N(0,1) under the i.i.d. null. Statistical tests based on the correlation integral are commonly used in time-series studies of financial markets. For example, \cite{KramerHiemstra} examine nonlinear temporal dependence between macroeconomic shocks and stock returns in the context of no-arbitrage asset pricing models.  
+
+\end{itemize}
+
+\section{Findings}
+
+\subsection{1-level Tests}
+
+I begin with 1-level tests, in which I perform tests on a single run of the generator.\footnote{The code used to generate the series and perform all the statistical analysis, and accompanying utility code to read and clean the tables from \cite{ZierlerBrillhart}, is available at \url{https://github.com/Charlie-Kramer/tausworthe}.} This run is parameterized as $q$=31, $p$=7, $l$=20, and length 1000. The corresponding polynomial is primitive; thus the generator has full period (equal here to about 2.1 billion). The seed is comprised of all 1 digits, which is not a fixed vector per the discussion above. Based on the formula from \cite{Tausworthe}, $E[\hat{\rho}]$ is $4.66 x 10^{-(10)}$. Accordingly, the generator is well parameterized in theory; however, it has some empirical shortcomings, as we see next. Indeed, I deliberately chose such a parameterization to show the potential issued confronting even a theoretically well-parameterized generator. For example, \cite{LEcuyer1998} cautions against using a generator with such a small $p$.
+
+\begin{figure}
+  \includegraphics[scale=0.5]{Figure1.png}
+  \caption{Gaps between histogram of $u_i$ (blue) and theoretical distribution (red line)}
+  \label{fig:fig1}
+\end{figure}
+
+Figure 1 shows a histogram of the distribution of the $U_i$.  The series shows significant gaps between the empirical (blue bars) and theoretical (red line) distributions. Indeed, the chi-square and Anderson-Darling goodness of fit tests reject the null of uniformity (p-values of 0.0 and 0.004 respectively). Running the series through the Input Analyzer in Rockwell Arena finds that the Beta distribution provides the best fit. 
+
+Figure 2 plots $u_i$ against $u_{i+1}$, colored by density. Each box should have around 10 points, whereas the number ranges from around 3 to 20. This suggests that the 2D distribution is not uniform.
+
+%\begin{figure}
+ % \includegraphics[scale=0.5]{Figure2.png}
+ % \caption{Uneven distribution of $u_i$ against $u_{i+1}$}
+ % \label{fig:fig2}
+%\end{figure}
+
+\begin{figure}
+  \includegraphics[scale=0.5]{Figure2.png}
+  \caption{Uneven distribution of $u_i$ against $u_{i+1}$ (heatmap)}
+  \label{fig:fig2}
+\end{figure}
+
+Figure 3 shows the relationship in three dimensions, plotting $u_i$, $u_{i+1}$ and $u_{i+2}$. Areas of uneven coverage are apparent here as well, notably near the edges and in the neighborhood of $u_i$=0.1, $u_{i+1}$=0.5, and $u_{i+2}$=0.3.
+
+\begin{figure}
+  \includegraphics[scale=0.5]{Figure3.png}
+  \caption{Uneven distribution of [$u_i$, $u_{i+1}, u_{i+2}]$}
+  \label{fig:fig3}
+\end{figure}
+
+I next examine temporal dependence. Figure 4 shows the sample autocorrelation up to 100 lags along with 2 standard error bars (blue shading). A few of the autocorrelations are at or near the error bars, but most are contained well within the bars, suggesting little autocorrelation overall. 
+
+\begin{figure}
+  \includegraphics[width=\linewidth]{Figure4.png}
+  \caption{Autocorrelations of $u_i$ are mostly within 2$\sigma$ of zero (blue shading)}
+  \label{fig:fig4}
+\end{figure}
+
+Formal statistical tests confirm a lack of dependence. In particular, I conduct a runs above-and-below mean (0.5) test, a Ljung-Box test with 100 lags, an ARCH test with 20 lags, and a BDS test with dimension 2. The tests fails to reject the null in the runs test, Ljung-Box test, the ARCH test, and BDS test at the usual levels (the tests yield p-values 0.14, 0.69, 0.39, and 0.27 respectively). 
+
+To summarize the 1-level tests, the series $u_i$ fails tests of uniformity but does not fail tests of independence. Thus, the evidence suggests that the series is not predictable, but not uniformly distributed. 
+
+\subsection{2-level Tests}
+
+\cite{LEcuyer1994} recommends running \emph{two-level} tests, in which one generates $N$ (presumably independent) copies of the sequence, computes the test statistic for each, and compares the empirical distribution of the statistic to its theoretical distribution under the null. I perform these tests using the P-values, which under the null have a uniform distribution. \cite{HungONeillBauerKohne} show how the distribution of p-values is skewed for various cases where the null is false. 
+
+I run the full suite of tests on 100 non-overlapping subsequences of $u_i$, each of length 1000. This generates the distributions of p-values shown in Figure 5.  The p-values for the chi-square and runs tests look most nearly uniform, with the Ljung-Box, ARCH, BDS and Anderson-Darling showing a greater amount of gapping or skewness. Chi-square goodness of fit tests on these distributions fail to reject the null that the p-value distribution is uniform at the 5 percent significance level. Nevertheless, the erratic distributions themselves should be grounds for caution in employing this generator. 
+\begin{figure}
+  \includegraphics[width=\linewidth]{Figure5.png}
+  \caption{P-values for 2-level tests; $\chi^2$ tests do not reject null of uniformity}
+  \label{fig:fig5}
+\end{figure}
+
+\subsection{Tests on Randomly-Chosen Parameterizations}
+
+I next sample 1000 times with replacement from the sets of $p,q$ compiled in \cite{ZierlerBrillhart} (first page of Table 1), generate a sample series of 1000 $u_i$ from each, then run a chi-squared goodness of fit test on each. To ensure adequate word length, I set $l$ to $2p$. Figure 6 shows the resulting p-values. The majority of the values are in the range near zero, indicating that most of the parameterizations reject the null of statistically-U(0,1) series. Overall, the skewness of the distribution is similar to that described in \cite{HungONeillBauerKohne}. 
+
+\begin{figure}
+  \includegraphics[width=\linewidth]{Figure6.png}
+  \caption{The null of uniform distribution is frequently rejected for randomized choice of primitive polynomials.}
+  \label{fig:fig6}
+\end{figure}
+
+
+\section{Conclusions}
+
+A range of tests find pitfalls in the series derived from the Tausworthe generator. In particular, the null of uniformity is often rejected in statistical tests, even for what are considered appropriate parameterizations from a theoretical perspective.  That said, the derived series do often pass tests for independence. 
+
+In sum, the Tausworthe generator on its own may not be sufficiently robust for simulation work. However, researchers have found that the Tausworthe generator can form the basis of a more complex but more reliable PRN generator. Notably, \cite{LEcuyer1996} shows that combining the outputs from several Tausworthe generators via the exclusive-or operation creates a more uniformly-distributed series. 
+
+
+\bibliography{ISYE6644biblio}{}
+\bibliographystyle{biblio}
+
+\end{document}
