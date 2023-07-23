@@ -14,7 +14,7 @@ The notebook contains the following routines:
 
 make_u(q,r,el,n).  Given the desired parameters, this routine returns the corresponding Tausworthe series as a list. 
 
-gen_norm(q,r,el,n). This calls make_u twice to generate $u1$ and $u2$, then applies the Box-Muller transformation, returning two series $z1, z2$ as lists.
+gen_norm(u). This applies the Box-Muller transformation to u.
 
 make_graphs(u,nbins). Given a series u and number of bins (for the histogram), this routine draws figures 1-5 in the paper.
 
