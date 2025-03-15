@@ -12,13 +12,13 @@ random (inbuilt)
 
 The notebook contains the following routines:
 
-make_u(q,r,el,n).  Given the desired parameters, this routine returns the corresponding Tausworthe series as a list. 
+*make_u(q,r,el,n)*.  Given the desired parameters, this routine returns the corresponding Tausworthe series as a list. 
 
-gen_norm(u). This applies the Box-Muller transformation to u.
+*gen_norm(u)*. This applies the Box-Muller transformation to u.
 
-make_graphs(u,nbins). Given a series u and number of bins (for the histogram), this routine draws figures 1-5 in the paper.
+*make_graphs(u,nbins)*. Given a series u and number of bins (for the histogram), this routine draws figures 1-5 in the paper.
 
-do_tests(u,nbins). Given the series u and the number of bins for the uniformity chi-square test, this routine applies the battery of tests for uniformity and independence, returning a dictionary with the value of each statistic and its corresponding p-value
+*do_tests(u,nbins)*. Given the series u and the number of bins for the uniformity chi-square test, this routine applies the battery of tests for uniformity and independence, returning a dictionary with the value of each statistic and its corresponding p-value
 
 The third cell performs the two-level tests; set the number of tests and desired length. It writes the results to a set of lists denoted [testname]_p and saves them to a csv file for later analysis. The fourth cell plots these results
 
